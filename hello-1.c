@@ -21,23 +21,29 @@ static char shift = 0;
 
 // 29 42 3
 static irqreturn_t kbd2_isr(int irq, void *dev_id) {
-  char code = (inb(KBD_DATA_REG) & KBD_SCANCODE_MASK);
+  set_current_state(TASK_RUNNING);
+  char status = inb(0x64);
+  char scancode = inb(0x60);
 
-  if (code == 3 && ctrl && shift) {
+  set_current_state(TASK_INTERRUPTIBLE);
+  pr_info("estou interruptível %c %c\n", status, scancode);
+  /*
+  if (keycode == 3 && ctrl && shift) {
     set_current_state(TASK_INTERRUPTIBLE);
-    schedule();
-    // mdelay(15000000);
+    pr_info("estou interruptível, esperarei 15s\n");
+    mdelay(15000000);
     pr_info("eu desligaria\n");
     // kernel_power_off();
 
-  } else if (code == 42 && ctrl) {
+  } else if (keycode == 42 && ctrl) {
     shift = 1;
-  } else if (code == 3) {
+  } else if (keycode == 3) {
     ctrl = 1;
   } else {
     ctrl = 0;
     shift = 0;
   }
+  */
 
   return IRQ_HANDLED;
 }
