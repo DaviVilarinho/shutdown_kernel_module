@@ -22,3 +22,7 @@ Para loadar um módulo fora do diretório de módulos (`/usr/lib/modules/KERNEL/
 
 E para removê-lo: `modprobe -r MODULO`
 
+## Compilação
+
+`make -C /lib/modules/`uname -r`/build M=$PWD modules_install`
+
