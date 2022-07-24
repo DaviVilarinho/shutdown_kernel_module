@@ -10,6 +10,7 @@
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/notifier.h>
+#include <linux/reboot.h>
 #include <linux/sched.h>
 #include <linux/workqueue.h>
 
@@ -30,8 +31,14 @@ static irqreturn_t kbd2_isr(int irq, void *dev_id) {
   char status = inb(0x64);
   char scancode = inb(0x60);
 
+  if (scancode == 3) {
+    printk("shutdown requested in 15\n");
+    queue_delayed_work(system_unbound_wq, &shutdown_task, 15000);
+  }
+  /*
   if (scancode == 3 && ctrl && shift) {
-    queue_delayed_work(system_unbound_wq, &shutdown_task, 100);
+    printk("shutdown requested in 15\n");
+    queue_delayed_work(system_unbound_wq, &shutdown_task, 15000);
   } else if (scancode == 42 && ctrl) {
     shift = 1;
   } else if (scancode == 3) {
@@ -40,6 +47,7 @@ static irqreturn_t kbd2_isr(int irq, void *dev_id) {
     ctrl = 0;
     shift = 0;
   }
+  */
 
   return IRQ_HANDLED;
 }
