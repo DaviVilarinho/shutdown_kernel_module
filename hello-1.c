@@ -11,6 +11,7 @@
 #include <linux/module.h>
 #include <linux/notifier.h>
 #include <linux/sched.h>
+#include <linux/workqueue.h>
 
 #define KBD_IRQ 1         /* IRQ number for keyboard (i8042) */
 #define KBD_DATA_REG 0x60 /* I/O port for keyboard data */
@@ -19,36 +20,32 @@
 static char ctrl = 0;
 static char shift = 0;
 
+static struct delayed_work shutdown_task;
+
+static void shutdown_condicionado(struct work_struct *w) { kernel_power_off(); }
+
 // 29 42 3
 static irqreturn_t kbd2_isr(int irq, void *dev_id) {
-  set_current_state(TASK_RUNNING);
+  // set_current_state(TASK_RUNNING);
   char status = inb(0x64);
   char scancode = inb(0x60);
 
-  set_current_state(TASK_INTERRUPTIBLE);
-  pr_info("estou interruptível %c %c\n", status, scancode);
-  /*
-  if (keycode == 3 && ctrl && shift) {
-    set_current_state(TASK_INTERRUPTIBLE);
-    pr_info("estou interruptível, esperarei 15s\n");
-    mdelay(15000000);
-    pr_info("eu desligaria\n");
-    // kernel_power_off();
-
-  } else if (keycode == 42 && ctrl) {
+  if (scancode == 3 && ctrl && shift) {
+    queue_delayed_work(system_unbound_wq, &shutdown_task, 100);
+  } else if (scancode == 42 && ctrl) {
     shift = 1;
-  } else if (keycode == 3) {
+  } else if (scancode == 3) {
     ctrl = 1;
   } else {
     ctrl = 0;
     shift = 0;
   }
-  */
 
   return IRQ_HANDLED;
 }
 
 static int __init kbd2_init(void) {
+  INIT_DELAYED_WORK(&shutdown_task, shutdown_condicionado);
   return request_irq(KBD_IRQ, kbd2_isr, IRQF_SHARED, "kbd2", (void *)kbd2_isr);
 }
 
