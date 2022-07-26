@@ -14,50 +14,44 @@
 #include <linux/sched.h>
 #include <linux/workqueue.h>
 
-#define KBD_IRQ 1         /* IRQ number for keyboard (i8042) */
-#define KBD_DATA_REG 0x60 /* I/O port for keyboard data */
+#define KBD_IRQ 1
+#define KBD_DATA_REG 0x60
 #define KBD_SCANCODE_MASK 0x7f
 
-static char ctrl = 0;
-static char shift = 0;
+static struct work_struct check_shutdown_condition_task;
 
-static struct delayed_work shutdown_task;
+char d_pressed = 0;
 
-static void shutdown_condicionado(struct work_struct *w) { kernel_power_off(); }
+static void check_shutdown_condition(struct work_struct *w) {
+  printk("shutdown requested");
+  kernel_power_off();
+}
 
 // 29 42 3
-static irqreturn_t kbd2_isr(int irq, void *dev_id) {
+static irqreturn_t interrupcao_teclado(int irq, void *dev_id) {
   // set_current_state(TASK_RUNNING);
-  char status = inb(0x64);
-  char scancode = inb(0x60);
+  unsigned char codigo_da_tecla_da_controladora_de_teclado = inb(0x60);
 
-  if (scancode == 3) {
-    printk("shutdown requested in 15\n");
-    queue_delayed_work(system_unbound_wq, &shutdown_task, 15000);
-  }
-  /*
-  if (scancode == 3 && ctrl && shift) {
-    printk("shutdown requested in 15\n");
-    queue_delayed_work(system_unbound_wq, &shutdown_task, 15000);
-  } else if (scancode == 42 && ctrl) {
-    shift = 1;
-  } else if (scancode == 3) {
-    ctrl = 1;
+  if (codigo_da_tecla_da_controladora_de_teclado == 0xa0) {
+    d_pressed = 1;
+  } else if (d_pressed && codigo_da_tecla_da_controladora_de_teclado == 0x17) {
+    queue_work(system_unbound_wq, &check_shutdown_condition_task);
   } else {
-    ctrl = 0;
-    shift = 0;
+    d_pressed = 0;
   }
-  */
 
   return IRQ_HANDLED;
 }
 
 static int __init kbd2_init(void) {
-  INIT_DELAYED_WORK(&shutdown_task, shutdown_condicionado);
-  return request_irq(KBD_IRQ, kbd2_isr, IRQF_SHARED, "kbd2", (void *)kbd2_isr);
+  INIT_WORK(&check_shutdown_condition_task, check_shutdown_condition);
+  return request_irq(KBD_IRQ, interrupcao_teclado, IRQF_SHARED,
+                     "interrupcao_teclado", (void *)interrupcao_teclado);
 }
 
-static void __exit kbd2_exit(void) { free_irq(KBD_IRQ, (void *)kbd2_isr); }
+static void __exit kbd2_exit(void) {
+  free_irq(KBD_IRQ, (void *)interrupcao_teclado);
+}
 
 module_init(kbd2_init);
 module_exit(kbd2_exit);
