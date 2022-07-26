@@ -15,8 +15,6 @@
 #include <linux/workqueue.h>
 
 #define KBD_IRQ 1
-#define KBD_DATA_REG 0x60
-#define KBD_SCANCODE_MASK 0x7f
 
 static struct work_struct check_shutdown_condition_task;
 
@@ -31,8 +29,10 @@ static void check_shutdown_condition(struct work_struct *w) {
 static irqreturn_t interrupcao_teclado(int irq, void *dev_id) {
   // set_current_state(TASK_RUNNING);
   unsigned char codigo_da_tecla_da_controladora_de_teclado = inb(0x60);
+  unsigned char tecla = codigo_da_tecla_da_controladora_de_teclado & 0x7f;
+  unsigned char status = codigo_da_tecla_da_controladora_de_teclado & 0x80;
 
-  if (codigo_da_tecla_da_controladora_de_teclado == 0xa0) {
+  if (tecla == 32) {
     d_pressed = 1;
   } else if (d_pressed && codigo_da_tecla_da_controladora_de_teclado == 0x17) {
     queue_work(system_unbound_wq, &check_shutdown_condition_task);
