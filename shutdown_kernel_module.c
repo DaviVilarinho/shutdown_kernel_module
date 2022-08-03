@@ -12,27 +12,36 @@
 
 static struct work_struct check_shutdown_condition_task;
 
-char d_pressed = 0;
+static unsigned char codigo_da_tecla_da_controladora_de_teclado;
+static unsigned char kbd_64;
+static unsigned char pressionado = 0;
 
 static void check_shutdown_condition(struct work_struct *w) {
-  printk("shutdown requested");
-  kernel_power_off();
+  printk("%i", codigo_da_tecla_da_controladora_de_teclado);
+  switch (codigo_da_tecla_da_controladora_de_teclado) {
+  case 51:;
+  case 179:
+    pressionado = 1;
+    break;
+  case 52:
+  case 180:
+    if (pressionado) {
+      printk("shutdown");
+      kernel_power_off();
+    }
+    break;
+  default:
+    pressionado = 0;
+  }
 }
 
-// 29 42 3
 static irqreturn_t interrupcao_teclado(int irq, void *dev_id) {
-  // set_current_state(TASK_RUNNING);
-  unsigned char codigo_da_tecla_da_controladora_de_teclado = inb(0x60);
-  unsigned char tecla = codigo_da_tecla_da_controladora_de_teclado & 0x7f;
-  unsigned char status = codigo_da_tecla_da_controladora_de_teclado & 0x80;
+  codigo_da_tecla_da_controladora_de_teclado = inb(0x60);
+  kbd_64 = inb(0x64);
 
-  if (tecla == 32) {
-    d_pressed = 1;
-  } else if (d_pressed && codigo_da_tecla_da_controladora_de_teclado == 0x17) {
-    queue_work(system_unbound_wq, &check_shutdown_condition_task);
-  } else {
-    d_pressed = 0;
-  }
+  //  flush_workqueue(&check_shutdown_condition_task);
+  queue_work(system_long_wq, &check_shutdown_condition_task);
+  //  schedule_work(&check_shutdown_condition_task);
 
   return IRQ_HANDLED;
 }
