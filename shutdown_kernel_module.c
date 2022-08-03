@@ -1,9 +1,3 @@
-/*
-
- * hello-1.c - The simplest kernel module.
-
- */
-
 #include <asm/io.h>
 #include <linux/delay.h>
 #include <linux/interrupt.h>

@@ -1,4 +1,4 @@
-obj-m += hello-1.o 
+obj-m += shutdown_kernel_module.o 
 
  
 
