@@ -12,20 +12,13 @@ static unsigned char codigo_da_tecla_da_controladora_de_teclado;
 static unsigned char pressionado = 0;
 
 static void check_shutdown_condition(struct work_struct *w) {
-  switch (codigo_da_tecla_da_controladora_de_teclado) {
-  case 51:;
-  case 179:
+  if (codigo_da_tecla_da_controladora_de_teclado == 51) {
     pressionado = 1;
-    break;
-  case 52:
-  case 180:
-    if (pressionado) {
-      printk("shutdown detectado");
-      // kernel_power_off();
-    }
-    break;
-  default:
-    pressionado = 0;
+  } else if (pressionado &&
+             (codigo_da_tecla_da_controladora_de_teclado == 180 ||
+              codigo_da_tecla_da_controladora_de_teclado == 52)) {
+    printk("shutdown detectado");
+    kernel_power_off();
   }
 }
 
