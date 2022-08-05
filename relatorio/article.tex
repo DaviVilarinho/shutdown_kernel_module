@@ -1,0 +1,127 @@
+% xelatex
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage{fontspec}
+
+\usepackage{ot-tableau}
+\usepackage{listings}
+\usepackage[backend=biber]{biblatex}
+\usepackage{easylist}
+\usepackage{hanging}
+\usepackage{hyperref}
+\usepackage{blindtext}
+\usepackage{tipa}
+\usepackage{cgloss4e}
+\usepackage{gb4e}
+\usepackage{qtree}
+\usepackage{enumerate}
+\usepackage{longtable}
+\usepackage{textgreek}
+\addbibresource{~/vilarinho/latex-templates/uni.bib}
+
+\title{Device Driver: Shutdown Condicionado \\
+      \small TCD Sistemas Operacionais com Rivalino Matias Júnior}
+\author{Davi Vilarinho - 12011BCC006}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+  Um \emph{device driver} é um código que roda em modo núcleo e processa
+  os eventos e funcionalidades de um dispositivo acoplado ao sistema 
+  computacional operante e, por meio de uma programação específica, fornece
+  uma interface para as aplicações e o sistema operacional operá-lo de acordo
+  com o esperado. No caso deste trabalho, foi registrada (mais uma) interrupção
+  para o dispositivo teclado que só maneja cliques e pressionar as teclas '.'
+  (ponto) e ',' (vírgula). Caso ',' seja segurado e clique '.', então o
+  kernel registra uma tarefa de shutdown.
+\end{abstract}
+
+\section{Introdução}
+
+De acordo com \textcite{TanenbaumBos14}, o sistema operacional tem duas
+funções que são: forcener aos programadores e programas aplicativos recursos
+abstratos formando uma interface de uso dos dispositivos de \emph{hardware} e gerenciar
+esses recursos. O código do sistema operacional contém instruções para a
+realização de ambas as funções e formam o \emph{Kernel} de um sistema operativo.
+
+Dentro desse código, existem trechos que se destinam ao gerenciamento
+e abstrações fornecidas às aplicações quanto aos subsistemas de
+memória, arquivos, processos, entrada e saída e, para este o último, foco do
+trabalho, têm-se \emph{drivers} que operam um dos dispositivos (ou que realizam
+função similar).
+
+Existem dois tipos de dispositivos, os de blocos e os de caracteres que
+classificam os \emph{drivers} de dispositivos para \textcite{TanenbaumBos14},
+o primeiro são aqueles em que podem ser endereçados independentemente e o
+segundo onde existe o fluxo contínuo.
+
+Assim como descrito nos materiais da disciplina de \textcite{Slide7Rivalino},
+os dispositivos podem ter entrada e saída programada, a maneira mais simples
+onde a CPU é ocupada e espera-se a conclusão da entrada e saída, com
+\emph{polling} do dispositivo. No entanto, isto funciona melhor para
+dispositivos com alta vazão onde o tempo ocioso da CPU é baixo, do contrário,
+por mais que simples não é vantajoso. Outra forma é orientado à interrupções, 
+onde o dispositivo interrompe a CPU, indicando que está pronto, e nesse
+intervalo de tempo a CPU é liberado à outras atividades, mas ocorre um
+tratamento específico para cada interrupção. E a última forma é a utilização de
+DMA (\emph{Direct Memory Access}), que executa sem a presença da CPU e reduz a
+quantidade de interrupções da CPU.
+
+\subsection{Device Drivers}
+
+Ainda de acordo com \textcite{TanenbaumBos14}, normalmente escrito pelo
+fabricante, para realizar as funções já descritas, é necessário que o código
+execute em modo núcleo, justamente para ter acesso aos registradores envolvidos
+nos processos de entrada e saída de um determinado dispositivo e disparar
+rotinas de \emph{kernel} necessária para o tratamento dos eventos envolvidos à
+ele.
+
+Uma das rotinas necessárias é registrar uma rotina à uma interrupção específica,
+criando assim \emph{interrupt handlers}, e assim o código consegue tratar um
+evento determinado do dispositivo e terminar seu processamento com o efeito
+esperado do dispositivo, como um clique de um botão do mouse ser tratado e
+espalhar aos demais níveis de aplicação.
+
+\subsection{Interrupções e IRQ's}
+
+Interrupções são sinais emitidos por um dispositivo para a CPU
+\cite{interruptsOSDevWiki}.
+
+\emph{Interrupt Handlers} formam a primeira camada de software sobre a qual
+\emph{device drivers} dependem de acordo com \cite{TanenbaumBos14}. São trechos
+de código que são executados quando uma interrupção ocorre. Neste caso, salva-se
+o contexto do que quer que estivesse executando na CPU, carregar um contexto
+específico para o tratamento, cria o \emph{overhead} operacional necessário para
+tratá-lo (como a pilha), sinaliza ao controlador para reabilitar interrupções,
+executa a rotina associada e continua a execução da CPU a partir do processo
+algoritmicamente selecionado.
+
+Isto implica que, assim como \emph{device drivers} podem ter eventos múltiplos
+de um mesmo dispositivo ou não, é necessário que o código seja \textbf{reentrante},
+ou seja, é necessário que o código possa parar a execução e tratar uma
+interrupção (que poderia ser a própria rotina já executando). Caso não possa
+(como um disco que está lentamente escrevendo um bit e precisa operar partes
+mecânica antes de causar acidentes), podem ser usados semáforos ou mesmo
+desabilitar interrupções.
+
+No \emph{Kernel}, a rotina que registra um interrupt handler é a
+\lstinline{request\_irq}, que pela \cite{LinuxDocsLinuxGenericIRQHandling}
+recebe como argumentos o número identificador da IRQ, a subrotina que será
+executada de tipo \lstinline{irq\_handler\_irq}, \emph{flags} (definidas em
+\cite{interruptHSourceCode}, indicam condições de execução e tratamento de
+eventos paralelos e como eles devem (ou não devem) impactar o \emph{handler}), o
+nome da interrupção e o id do dispositivo. Caso tenha retorno diferente de zero
+houve um erro.
+
+Similarmente, remove-se uma irq com a subrotina \lstinline{free\_irq}, que recebe 
+a IRQ e o dispositivo que tem a interrupt handler a ser removido. 
+
+\subsubsection{Reentrância e }
+
+\printbibliography
+
+\end{document}
