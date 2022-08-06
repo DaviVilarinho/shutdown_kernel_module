@@ -1,0 +1,670 @@
+\documentclass[
+	12pt,			
+	openright,			% capítulos começam em pág ímpar (insere página vazia caso preciso)
+	twoside,			% para impressão em recto e verso. Oposto a oneside
+	a4paper,			% tamanho do papel. 
+	english,			% idioma adicional para hifenização
+	brazil,				% o último idioma é o principal do documento
+	]{abntex2}
+
+
+% ---
+% PACOTES
+% ---
+
+% ---
+% Pacotes fundamentais 
+% ---
+\usepackage{lmodern}			% Usa a fonte Latin Modern
+\usepackage[T1]{fontenc}		% Selecao de codigos de fonte.
+\usepackage[utf8]{inputenc}		% Codificacao do documento (conversão automática dos acentos)
+\usepackage{indentfirst}		% Indenta o primeiro parágrafo de cada seção.
+\usepackage{color}				% Controle das cores
+\usepackage{graphicx}			% Inclusão de gráficos
+\usepackage{microtype} 			% para melhorias de justificação
+\usepackage{csquotes}
+% ---
+
+% ---
+% Pacotes adicionais, usados no anexo do modelo de folha de identificação
+% ---
+\usepackage{multicol}
+\usepackage{multirow}
+% ---
+	
+% ---
+% Pacotes adicionais, usados apenas no âmbito do Modelo Canônico do abnteX2
+% ---
+\usepackage{lipsum}				% para geração de dummy text
+% ---
+
+% ---
+% Pacotes de citações
+% ---
+\usepackage[style=abnt,backend=biber]{biblatex}
+%\usepackage[alf]{abntex2cite}	% Citações padrão ABNT
+
+% ---
+% Formatação de código-fonte
+% ---
+\usepackage{listings}
+\usepackage{color}
+
+% Altera o nome padrão do rótulo usado no comando \autoref{}
+\renewcommand{\lstlistingname}{Código}
+
+% Altera o rótulo a ser usando no elemento pré-textual "Lista de código"
+\renewcommand{\lstlistlistingname}{Lista de códigos}
+
+% Configura a ``Lista de Códigos'' conforme as regras da ABNT (para abnTeX2)
+\begingroup\makeatletter
+\let\newcounter\@gobble\let\setcounter\@gobbletwo
+  \globaldefs\@ne \let\c@loldepth\@ne
+  \newlistof{listings}{lol}{\lstlistlistingname}
+  \newlistentry{lstlisting}{lol}{0}
+\endgroup
+
+\renewcommand{\cftlstlistingaftersnum}{\hfill--\hfill}
+
+\let\oldlstlistoflistings\lstlistoflistings
+\renewcommand{\lstlistoflistings}{%
+   \begingroup%
+   \let\oldnumberline\numberline%
+   \renewcommand{\numberline}{\lstlistingname\space\oldnumberline}%
+   \oldlstlistoflistings%
+   \endgroup}
+
+\lstloadlanguages{C}
+\definecolor{theshade}{rgb}{1,1,0.97}
+\definecolor{theframe}{gray}{0.6}
+\definecolor{mymauve}{rgb}{0.87,0.69,1}
+\lstdefinestyle{C}{
+  alsoother={0123456789_},
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  % the size of the fonts that are used for the code
+  basicstyle=\ttfamily\ABNTEXfontereduzida, 
+  backgroundcolor=\color{theshade},
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=single,                    % adds a frame around the code
+  inputencoding=utf8,
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{blue},       % keyword style
+  language=C,                 % the language of the code
+  literate={á}{{\'a}}1 {ã}{{\~a}}1 {é}{{\'e}}1 {è}{{\`{e}}}1 {ê}{{\^{e}}}1 {ë}{{\¨{e}}}1 {É}{{\'{E}}}1 {Ê}{{\^{E}}}1 {û}{{\^{u}}}1 {ú}{{\'{u}}}1 {â}{{\^{a}}}1 {à}{{\`{a}}}1 {á}{{\'{a}}}1 {ã}{{\~{a}}}1 {Á}{{\'{A}}}1 {Â}{{\^{A}}}1 {Ã}{{\~{A}}}1 {ç}{{\c{c}}}1 {Ç}{{\c{C}}}1 {õ}{{\~{o}}}1 {ó}{{\'{o}}}1 {ô}{{\^{o}}}1 {Õ}{{\~{O}}}1 {Ó}{{\'{O}}}1 {Ô}{{\^{O}}}1 {î}{{\^{i}}}1 {Î}{{\^{I}}}1 {í}{{\'{i}}}1 {Í}{{\~{Í}}}1,
+  % if you want to add more keywords to the set
+  morekeywords={*, :-},
+  numberbychapter=false,
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  % the style that is used for the line-numbers
+  numberstyle=\tiny\color{theframe}\sffamily, 
+  rulecolor=\color{theframe},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=4,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve}\itshape,     % string literal style
+  tabsize=2,                       % sets default tabsize to 2 spaces
+  title=\lstname,                  % show the filename of files included with \lstinputlisting; also try caption instead of title
+  framexleftmargin=10pt,
+  framexleftmargin=15pt
+}
+\lstset{escapechar=@,style=c}
+% --- 
+% CONFIGURAÇÕES DE PACOTES
+% --- 
+
+\addbibresource{~/vilarinho/latex-templates/uni.bib}
+
+% ---
+% Configurações do pacote backref
+% Usado sem a opção hyperpageref de backref
+% ---
+% Usado sem a opção hyperpageref de backref
+% ---
+% Informações de dados para CAPA e FOLHA DE ROSTO
+% ---
+\titulo{Device Driver: Shutdown Condicionado \\
+      \small TCD Sistemas Operacionais com Rivalino Matias Júnior}
+\autor{Davi Vilarinho}
+\local{Uberlândia, Minas Gerais}
+\data{2022}
+\orientador{Rivalino Matias Júnior}
+\instituicao{%
+  Universidade Federal de Uberlândia -- UFU
+  \par
+  Faculdade de Computação
+  \par
+  Bacharelado em Ciência da Computação}
+\tipotrabalho{Relatório técnico}
+% O preambulo deve conter o tipo do trabalho, o objetivo, 
+% o nome da instituição e a área de concentração 
+\preambulo{Relatório técnico que visa implementação de um módulo no
+\emph{kernel}
+Linux que desligue sob uma sequência de teclas}
+% ---
+
+% ---
+% Configurações de aparência do PDF final
+
+% alterando o aspecto da cor azul
+\definecolor{blue}{RGB}{41,5,195}
+
+% informações do PDF
+\makeatletter
+\hypersetup{
+     	%pagebackref=true,
+		pdftitle={\@title}, 
+		pdfauthor={\@author},
+    	pdfsubject={\imprimirpreambulo},
+	    pdfcreator={LaTeX with abnTeX2},
+		pdfkeywords={abnt}{latex}{abntex}{abntex2}{relatório técnico}, 
+		colorlinks=true,       		% false: boxed links; true: colored links
+    	linkcolor=blue,          	% color of internal links
+    	citecolor=blue,        		% color of links to bibliography
+    	filecolor=magenta,      		% color of file links
+		urlcolor=blue,
+		bookmarksdepth=4
+}
+\makeatother
+% --- 
+
+% --- 
+% Espaçamentos entre linhas e parágrafos 
+% --- 
+
+% O tamanho do parágrafo é dado por:
+\setlength{\parindent}{1.3cm}
+
+% Controle do espaçamento entre um parágrafo e outro:
+\setlength{\parskip}{0.2cm}  % tente também \onelineskip
+
+% ---
+% compila o indice
+% ---
+\makeindex
+% ---
+
+% ----
+% Início do documento
+% ----
+\begin{document}
+
+% Seleciona o idioma do documento (conforme pacotes do babel)
+%\selectlanguage{english}
+\selectlanguage{brazil}
+
+% Retira espaço extra obsoleto entre as frases.
+\frenchspacing 
+
+% ----------------------------------------------------------
+% ELEMENTOS PRÉ-TEXTUAIS
+% ----------------------------------------------------------
+\pretextual
+
+% ---
+% Capa
+% ---
+\imprimircapa
+% ---
+
+% ---
+% Folha de rosto
+% (o * indica que haverá a ficha bibliográfica)
+% ---
+\imprimirfolhaderosto*
+% ---
+
+% ---
+% Anverso da folha de rosto:
+% ---
+
+{
+  \begin{folhadeaprovacao}
+\begin{center}
+{\ABNTEXchapterfont\large\imprimirautor}
+\vspace*{\fill}\vspace*{\fill}
+\begin{center}
+\ABNTEXchapterfont\bfseries\Large\imprimirtitulo
+\end{center}
+\vspace*{\fill}
+\hspace{.45\textwidth}
+\begin{minipage}{.5\textwidth}
+\imprimirpreambulo
+\end{minipage}%
+\vspace*{\fill}
+\end{center}
+\assinatura{\textbf{\imprimirorientador} \\ Orientador}
+\begin{center}
+\vspace*{0.5cm}
+{\large\imprimirlocal}
+\par
+{\large\imprimirdata}
+\vspace*{1cm}
+\end{center}
+\end{folhadeaprovacao}
+}
+
+% ---
+% RESUMO
+% ---
+
+% resumo na língua vernácula (obrigatório)
+\setlength{\absparsep}{18pt} % ajusta o espaçamento dos parágrafos do resumo
+\begin{resumo}
+  Um \emph{device driver} é um código que roda em modo núcleo e processa
+  os eventos e funcionalidades de um dispositivo acoplado ao sistema 
+  computacional operante e, por meio de uma programação específica, fornece
+  uma interface para as aplicações e o sistema operacional operá-lo de acordo
+  com o esperado. No caso deste trabalho, foi registrada (mais uma) interrupção
+  para o dispositivo teclado que só maneja cliques e pressionar as teclas '.'
+  (ponto) e ',' (vírgula). Caso ',' seja segurado e clique '.', então o
+  \emph{kernel} registra uma tarefa de shutdown.
+
+ \noindent
+ \textbf{Palavras-chaves}: driver. módulo. kernel. linux. interrupção. irq.
+\end{resumo}
+% ---
+
+% ---
+% inserir lista de ilustrações
+% ---
+% \pdfbookmark[0]{\listfigurename}{lof}
+% \listoffigures*
+% \cleardoublepage
+% ---
+% ---
+% inserir lista de listings
+% ---
+\pdfbookmark[0]{\lstlistlistingname}{lol}
+\begin{KeepFromToc}
+
+\lstlistoflistings
+
+  { \section{Makefile}
+  \lstinputlisting[language=c,label=makefileShutdownCondicionado]{../Makefile} }
+
+  { \section{Módulo Shutdown Condicionado}
+  \lstinputlisting[language=c,label=sourceShutdownCondicionado]{../shutdown_kernel_module.c}
+
+  }
+
+\end{KeepFromToc}
+\cleardoublepage
+% ---
+
+
+% ---
+% inserir lista de tabelas
+% ---
+% \pdfbookmark[0]{\listtablename}{lot}
+% \listoftables*
+% \cleardoublepage
+% ---
+
+% ---
+% inserir lista de abreviaturas e siglas
+% ---
+\begin{siglas}
+  \item[IRQ] Interrupt request
+  \item[DMA] Direct Memory Access
+  \item[CPU] Central Processing Unit
+\end{siglas}
+% ---
+
+% ---
+% inserir lista de símbolos
+% ---
+% \begin{simbolos}
+%   \item[$ \Gamma $] Letra grega Gama
+%   \item[$ \Lambda $] Lambda
+%   \item[$ \zeta $] Letra grega minúscula zeta
+%   \item[$ \in $] Pertence
+% \end{simbolos}
+% ---
+
+% ---
+% inserir o sumario
+% ---
+\pdfbookmark[0]{\contentsname}{toc}
+\tableofcontents*
+\cleardoublepage
+% ---
+
+
+% ----------------------------------------------------------
+% ELEMENTOS TEXTUAIS
+% ----------------------------------------------------------
+\textual
+
+% ----------------------------------------------------------
+% Introdução (exemplo de capítulo sem numeração, mas presente no Sumário)
+% ----------------------------------------------------------
+\chapter*[Introdução]{Introdução}
+\addcontentsline{toc}{chapter}{Introdução}
+
+De acordo com \textcite{TanenbaumBos14}, o sistema operacional tem duas
+funções que são: forcener aos programadores e programas aplicativos recursos
+abstratos formando uma interface de uso dos dispositivos de \emph{hardware} e gerenciar
+esses recursos. O código do sistema operacional contém instruções para a
+realização de ambas as funções e formam o \emph{kernel} de um sistema operativo.
+
+Dentro desse código, existem trechos que se destinam ao gerenciamento
+e abstrações fornecidas às aplicações quanto aos subsistemas de
+memória, arquivos, processos, entrada e saída e, para este o último, foco do
+trabalho, têm-se \emph{drivers} que operam um dos dispositivos (ou que realizam
+função similar).
+
+Existem dois tipos de dispositivos, os de blocos e os de caracteres que
+classificam os \emph{drivers} de dispositivos para \textcite{TanenbaumBos14},
+o primeiro são aqueles em que podem ser endereçados independentemente e o
+segundo onde existe o fluxo contínuo.
+
+Assim como descrito nos materiais da disciplina de \textcite{Slide7Rivalino},
+os dispositivos podem ter entrada e saída programada, a maneira mais simples
+onde a CPU é ocupada e espera-se a conclusão da entrada e saída, com
+\emph{polling} do dispositivo. No entanto, isto funciona melhor para
+dispositivos com alta vazão onde o tempo ocioso da CPU é baixo, do contrário,
+por mais que simples não é vantajoso. Outra forma é orientado à interrupções, 
+onde o dispositivo interrompe a CPU, indicando que está pronto, e nesse
+intervalo de tempo a CPU é liberado à outras atividades, mas ocorre um
+tratamento específico para cada interrupção. E a última forma é a utilização de
+DMA (\emph{Direct Memory Access}), que executa sem a presença da CPU e reduz a
+quantidade de interrupções da CPU.
+
+% ----------------------------------------------------------
+% PARTE - preparação da pesquisa
+% ----------------------------------------------------------
+\part{Estudo do Kernel e Drivers}
+
+\chapter{Estudo do Kernel e Drivers}
+
+\section{Device Drivers}
+
+Ainda de acordo com \textcite{TanenbaumBos14}, normalmente escrito pelo
+fabricante, para realizar as funções já descritas, é necessário que o código
+execute em modo núcleo, justamente para ter acesso aos registradores envolvidos
+nos processos de entrada e saída de um determinado dispositivo e disparar
+rotinas de \emph{kernel} necessária para o tratamento dos eventos envolvidos à
+ele.
+
+Uma das rotinas necessárias é registrar uma rotina à uma interrupção específica,
+criando assim \emph{interrupt handlers}, e assim o código consegue tratar um
+evento determinado do dispositivo e terminar seu processamento com o efeito
+esperado do dispositivo, como um clique de um botão do mouse ser tratado e
+espalhar aos demais níveis de aplicação.
+
+\section{Interrupções e IRQ's}
+
+Interrupções são sinais emitidos por um dispositivo para a CPU
+\cite{interruptsOSDevWiki}.
+
+\emph{Interrupt Handlers} formam a primeira camada de software sobre a qual
+\emph{device drivers} dependem de acordo com \cite{TanenbaumBos14}. São trechos
+de código que são executados quando uma interrupção ocorre. Neste caso, salva-se
+o contexto do que quer que estivesse executando na CPU, carregar um contexto
+específico para o tratamento, cria o \emph{overhead} operacional necessário para
+tratá-lo (como a pilha), sinaliza ao controlador para reabilitar interrupções,
+executa a rotina associada e continua a execução da CPU a partir do processo
+algoritmicamente selecionado.
+
+No \emph{kernel}, a rotina que registra um interrupt handler é a
+\lstinline{request_irq}, que pela \cite{LinuxDocsLinuxGenericIRQHandling}
+recebe como argumentos o número identificador da IRQ, a subrotina que será
+executada de tipo \lstinline{irq_handler_irq}, \emph{flags} (definidas em
+\cite{interruptHSourceCode}, indicam condições de execução e tratamento de
+eventos paralelos e como eles devem (ou não devem) impactar o \emph{handler}), o
+nome da interrupção e o id do dispositivo. Caso tenha retorno diferente de zero
+houve um erro.
+
+Similarmente, remove-se uma irq com a subrotina \lstinline{free_irq}, que recebe 
+a IRQ e o dispositivo que tem a interrupt handler a ser removido.
+
+\subsection{Reentrância}
+
+Uma propriedade válida para \emph{device drivers} e \emph{interrupt handlers},
+durante a execução do sistema operativo podem ocorrer eventos múltiplos
+de um mesmo dispositivo ou não, então é necessário que o código seja \textbf{reentrante}.
+
+É necessário que o código possa parar a execução e tratar uma interrupção (que
+poderia ser a própria rotina já executando). Caso não possa (como um disco que
+está lentamente escrevendo um bit e precisa operar partes mecânicas que
+potencialmente causam acidentes), podem ser usados semáforos ou mesmo
+desabilitar interrupções até que a finalização da execução (ou tarefas de mesma
+categoria), e normalmente define-se o que é conhecido como \emph{top half}, a
+parte da execução com prioridade máxima que é rápida e fundamental ou não pode
+ser interrompida e a \emph{bottom half} que é a parte mais lenta e que pode ser
+interrompida\footcite{topbottomhalves}.
+
+\section{Carregamento dos Drivers}
+
+Drivers podem ser, como já abordado, individuais ou genérico à
+dispositivos de um mesmo tipo (ou tipos diferentes, desde que uma interface de
+entrada igual, como um teclado USB e pendrive USB, que utilizam o protocolo
+USB), mas independentemente podem ser carregados de forma distinta.
+
+Uma das formas e a primeira é estar presente no código fonte do \emph{kernel} e ser
+compilado com todas as intruções já previamente definidas. Esta é a única forma
+de carregá-lo em caso de núcleo monolítico. No entanto, em sistemas modernos e
+principalmente depois do advento de computadores pessoais \cite{TanenbaumBos14},
+é suportado carregamento dinâmico dos drivers por meio de \textbf{módulos}.
+
+\subsection{Módulos}
+
+Módulos são pedaços de código que podem ser carregados e descarregados no \emph{kernel}
+na medida em que forem necessários sem a necessidade de reiniciar o sistema
+operativo ou a máquina \footcite{pomerantzsalzmanburianmottramhuang2022}.
+
+Módulos podem ser listados pelo usuário por meio de programas auxiliares como
+o \lstinline{lsmod} como visto em \autoref{saidalsmod}. 
+
+A inserção de um módulo ocorre com \lstinline{insmod nome_do_modulo}.
+
+\subsubsection{Compilação de um módulo}
+
+Para programar um módulo precisa-se de algumas ferramentas durante a compilação
+(como os \emph{headers} do Linux), mas cada distribuição possui um pacote
+diferente. No referido artigo define-se o \emph{kernel} 5.18 e distribuição
+\emph{Arch Linux} então os pacotes necessários foram:
+
+\begin{itemize}
+    \item{linux-headers}
+    \item{kmod}
+    \item{gcc}
+\end{itemize}
+
+A compilação de um código fonte de um módulo, embora da linguagem C, não é
+simplesmente incluir cabeçalhos de bibliotecas instaladas no sistema (ou seja,
+não há rotinas de libs como \lstinline{printf}), mas é realizada pelas próprias
+\emph{makefiles} do kernel e compilam os códigos objeto marcados \emph{obj-m} no
+formato \emph{ko}, diferenciado pelo fato de conter metadados acerca do módulo
+\footcite{compilingKernelModules}.
+
+Uma \emph{Makefile} exemplo pode ser encontrada em
+\autoref{makefileShutdownCondicionado}. Uma saída das informações de um módulo compilado 
+com o código referenciado pode ser encontrado no \autoref{saidamodinfo}.
+
+% ----------------------------------------------------------
+% Parte de resultados
+% ----------------------------------------------------------
+\part{Implementação}
+
+\chapter{Implementação}
+
+O código implementado está disponível \autoref{sourceShutdownCondicionado}.
+
+\section{Definição do módulo}
+
+Todo módulo possui uma estrutura predeterminada pelo sistema operacional e
+algumas macros já foram desenvolvidas a fim de facilitar o desenvolvimento de
+módulos por outros desenvolvedores. Essas macros são declaradas no header
+\texttt{linux/module.h} \footcite{LinuxModuleDocumentation}.
+
+\begin{itemize}
+  \item Macro \lstinline{init_module} em \textcite{initmoduleman}: é responsável por
+    carregar uma imagem ELF em modo núcleo de forma a não conflitar e garantir
+    confiabilidade na inserção dinâmica de instruções ao \emph{kernel}. Visto na
+    linha 58 de \autoref{sourceShutdownCondicionado}.
+
+  \item{Macro \lstinline{exit_module} pelo \textcite{LinuxDeviceDrivers}: responsável
+    por limpar o que a adição deste fragmento de código fez ao \emph{kernel}, de
+    maneira a assegurar a correta e prevista execução do núcleo anteriormente à
+    adição de um módulo. Visto na linha 59 de \autoref{sourceShutdownCondicionado}}
+
+  \item{Macro \lstinline{__init}: responsável por reduzir a quantidade de
+    memória utilizada pelo \emph{kernel} e possibita ao núcleo, depois de um
+    \emph{driver} ser inicializado, poder remover esse trecho de código da
+    memória. No entanto, isso só não é válido para módulos, mas marcar não fará
+    diferença e é uma convenção para \emph{drivers}
+    \footcite{LinuxDeviceDrivers}. Nota-se que a rotina
+    implementada com essa macro, no entanto, é aquela que inicializa o código
+    principal deste projeto, isto é, cria um \emph{interrupt handler} que fará o
+    restante do processamento}.
+
+  \item Macro \lstinline{__exit}: similarmente à anterior, limpa o que foi
+    inicializado.
+
+  \item Macro \lstinline{MODULE_LICENSE}: indica a licença do código escrito.
+\end{itemize}
+
+\section{Implementação do Interrupt Handler}
+
+Na inicialização do módulo, é inicializada uma \emph{work queue} na linha 28
+de \autoref{sourceShutdownCondicionado}, que de acordo com
+\textcite{pierreUnderstandingTheLinuxKernel} são mecanismos do \emph{kernel} que
+permitem registrar subrotinas para serem executadas quando enfileiradas, em uma
+fila do sistema operacional específica (normalmente referente à prioridade ou
+categoria). Nesse caso, apenas registra que o tipo de trabalho será o da
+subrotina \lstinline{check_shutdown_condition} e, ao serem enfileiradas tarefas, o
+sistema operacional executará o trecho escolhido.
+
+Após isso, nas linhas 29 e 30 de \autoref{sourceShutdownCondicionado} temos:
+
+\begin{lstlisting}[language=C]
+  if (request_irq(IRQ_TECLADO, interrupcao_teclado, IRQF_SHARED,
+                  "interrupcao_teclado", (void *)&teclado_device)) {
+\end{lstlisting}
+
+Já foi descrito a funcionalidade de \lstinline{request_irq}, mas nesse caso o
+objetivo foi registrar que ao acontecer uma interrupção de número 1 (descoberta
+pela \textcite{interruptsOSDevWiki}) seria as do teclado. Registramos a
+subrotina \lstinline{interrupcao_teclado} para ocorrer como \emph{handler} da
+interrupção ocorrida. A \lstinline{IRQF_SHARED} é uma \emph{flag} prevista pelo
+\emph{kernel} \footcite{interruptHSourceCode} e, caso todas as demais
+interrupções registradas pelo dispositivo sejam de mesmo tipo, garante que todos
+do mesmos interrupt handlers do dispositivos serão acionados. A chamada também
+o nomeia "interrupção\_teclado" e registra o dispositivo "0xaa" (o teclado). Em
+caso de erro é registrado o mesmo.
+
+O corpo do \emph{interrupt handler} recebe como argumento a irq e um ponteiro
+para o id. Verifica-se que a irq se refere à 1 (teclado). Requisita-se a porta
+de endereço "0x60", esta que possui a informação sobre qual tecla gerou a
+interrupção (e seu status).
+
+Caso o as teclas não sejam o clique ou pressionamento das teclas "," ou ".",
+deve ser ignorada o tratamento, caso contrário, registra-se uma tarefa na fila
+de processos de longa duração (uma vez que não tem prioridade para a
+execução deste trecho) na linha 38 de \autoref{sourceShutdownCondicionado}:
+
+\begin{lstlisting}[language=C]
+  queue_work(system_long_wq, &check_shutdown_condition_task);
+\end{lstlisting}
+
+E então retorna-se que a interrupção foi tratada.
+
+\section{Verificação das condições}
+
+Nas linhas 15 e 16 de \autoref{sourceShutdownCondicionado} têm-se:
+
+\begin{lstlisting}[language=C]
+  if (codigo_da_tecla_da_controladora_de_teclado == 51) {
+    pressionado = 1;
+\end{lstlisting}
+
+Se a tecla ',' estiver pressionada ou foi a última pressionada ativa uma
+\emph{flag} que guarda o estado de pressionamento da mesma. Caso esta flag
+esteja pressionada e aconteça um clique ou pressionamento na tecla '.', então o
+kernel registra o evento e inicia o procedimento de desligamento. Caso nenhuma
+das condições ocorram, a \emph{flag} pressionado volta ao estado falso.
+
+% ---
+% Conclusão
+% ---
+\chapter{Conclusão}
+% ---
+
+A implementação de um \emph{device driver} no Linux por meio de um módulo
+permite a visualização de diversas interfaces disponibilizadas pelo núcleo do
+sistema operativo, dentre elas destaca-se o registro de interrupções, o
+tratamento das mesmas e como refletem e são afetadas pelo estado da máquina.
+
+Inicialmente, foi necessário a compilação com o próprio código do \emph{kernel}
+e isso explicita como sistemas operacionais modernos disponibilizam o
+carregamento dinâmico de trechos de código, bem como as vantagens de um
+mecanismo estático (a possibilidade de desocupar memória alocada para drivers
+desabilitados).
+
+Com a criação de um \emph{interrupt handler}, verifica-se como dispositivos
+podem comunicar com a CPU via interrupções e registrar nas portas as informações
+capturadas.
+
+Por fim, verificou-se que não pode interromper o fluxo de tratamento de IRQ's
+com um desligamento forçado, por exemplo, porque faltaria uma interrupção ser
+tratada. Assim houve necessidade de registro de tarefas nas filas de execução 
+de trabalhos do \emph{kernel}. A escolha de sequer fazer o tratamento de teclas
+não envolvidas se deveu à uma tentativa de ganhar desempenho e evitar atrasar
+demais interrupções (que ocorriam principalmente quando havia pressionamento de
+outras teclas), timidamente relacionando com o conceito de \emph{Bottom Half} e
+\emph{Top Half}\footcite{topbottomhalves}.
+
+% ----------------------------------------------------------
+% ELEMENTOS PÓS-TEXTUAIS
+% ----------------------------------------------------------
+\postextual
+
+% ----------------------------------------------------------
+% Referências bibliográficas
+% ----------------------------------------------------------
+\printbibliography
+
+% ----------------------------------------------------------
+% Glossário
+% ----------------------------------------------------------
+%
+% Consulte o manual da classe abntex2 para orientações sobre o glossário.
+%
+%\glossary
+
+% ----------------------------------------------------------
+% Apêndices
+% ----------------------------------------------------------
+
+% ----------------------------------------------------------
+% Anexos
+% ----------------------------------------------------------
+\begin{anexosenv}
+\partanexos
+
+  {\label{saidalsmod}
+\lstinputlisting{saida-lsmod.txt}}
+
+  {\label{saidamodinfo}
+  \lstinputlisting{saida-modinfo.txt}}
+
+\end{anexosenv}
+
+%---------------------------------------------------------------------
+% INDICE REMISSIVO
+%---------------------------------------------------------------------
+
+\phantompart
+
+\printindex
+
+\end{document}

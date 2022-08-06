@@ -1,0 +1,7 @@
+filename:       /home/davi/vilarinho/shutdown_kernel_module/shutdown_kernel_module.ko
+license:        GPL
+srcversion:     6396DC0B5A8E73C25DDD9D8
+depends:        
+retpoline:      Y
+name:           shutdown_kernel_module
+vermagic:       5.18.16-arch1-1 SMP preempt mod_unload 
