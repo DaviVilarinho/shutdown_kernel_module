@@ -590,7 +590,8 @@ Nas linhas 15 e 16 de \autoref{sourceShutdownCondicionado} têm-se:
 Se a tecla ',' estiver pressionada ou foi a última pressionada ativa uma
 \emph{flag} que guarda o estado de pressionamento da mesma. Caso esta flag
 esteja pressionada e aconteça um clique ou pressionamento na tecla '.', então o
-kernel registra o evento e inicia o procedimento de desligamento. Caso nenhuma
+kernel registra o evento e inicia o procedimento de desligamento por meio da
+subrotina do kernel \lstinline{kernel_power_off()}. Caso nenhuma
 das condições ocorram, a \emph{flag} pressionado volta ao estado falso.
 
 % ---
