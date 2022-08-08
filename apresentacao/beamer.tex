@@ -1,0 +1,186 @@
+%%% もし pdfTeX や LuaTeX を使うなら dvipdfmx オプションを外す．
+% \documentclass[dvipdfmx]{beamer}
+\documentclass{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage{mathspec}
+\usepackage{xeCJK}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{color}
+\usepackage{multicol}
+\usepackage[style=iso]{datetime2}
+\setCJKmainfont{IPAPMincho}
+\setCJKsansfont{IPAGothic}
+\setCJKmonofont{IPAGothic}
+
+% You can set fonts for Latin script here
+\setmainfont{FreeSerif}
+\setsansfont{FreeSans}
+\setmonofont{Latin Modern Mono}
+
+%%% もし pTeX + dvipdfmx を使うならば以下のどちらかを環境に合わせてコメントアウト．
+%% \AtBeginDvi{\special{pdf:tounicode EUC-UCS2}} % EUC の場合
+%% \AtBeginDvi{\special{pdf:tounicode 90ms-RKSJ-UCS2}} % SJIS の場合
+
+%%% もし LuaTeX で日本語を出力するなら以下をコメントアウト．
+%% \usefonttheme{luatexja}
+%% \hypersetup{unicode}
+
+%%% 日本語を使うなら以下を入れると定理環境中のフォントが立体になる．
+%%% 欧文なら不要．
+%%% LLT: Comment out this line if your presentation is in English or other European languages
+
+\title{Driver do Shutdown Condicionado}
+\author{Davi Vilarinho}
+\institute{UFU \\ Faculdade de Computação \\ Universidade Federal de Uberlândia}
+\date{\today}
+
+\begin{document}
+
+\begin{frame}
+  \maketitle
+\end{frame}
+
+\begin{frame}{Relembrando...}
+  Um \emph{device driver} é um código, normalmente escrito pelo fabricante, para
+  controlar um dispositivo de hardware.
+
+  Esse controle pode ser programado, interrupções ou DMA.
+
+  Interrupções são eventos que ocorrem quando um sinal é emitido por um
+  dispositivo e a CPU para o que está fazendo para tratar o ocorrido.
+\end{frame}
+
+\begin{frame}{Módulo do Kernel}
+  Um módulo do Kernel não é nada mais que código dinamicamente carregado pelo
+  kernel on the fly.
+
+  \begin{block}{Compilação e Carregamento}
+
+  O kernel é um executável, mas quando há compilação de um módulo, insere-se
+  instruções ao executável existente, mas para isso um mecanismo de build 
+  especial para módulos faz-se necessários.
+  
+  Garante-se acesso aos recursos do kernel pelo código carregado dinamicamente.
+  \end{block}
+\end{frame}
+
+\begin{frame}{A estrutura de um módulo de kernel}
+  Sem efeito para módulos, mas convenção:
+
+  \begin{itemize}
+      \item \texttt{\_\_init}: macro para subrotina que inicializa o módulo.
+    
+      \item \texttt{\_\_exit}: macro para subrotina que descarrega o módulo.
+    
+      \item \texttt{init\_module}: macro para indicar qual é a subrotina que inicializa o módulo.
+    
+      \item \texttt{exit\_module}: macro para indicar qual é a subrotina que descarrega o módulo.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{O código}
+\begin{verbatim}
+    #include <linux/module.h>
+    ...
+    static int __init inicio_do_seu_modulo(void) 
+    ...
+    static void __exit fim_do_seu_modulo(void)
+    ...
+
+    module_init(inicio_do_seu_modulo);
+    module_exit(fim_do_seu_modulo);
+
+    MODULE_LICENSE("GPL"); // ou a sua license
+\end{verbatim}
+\end{frame}
+
+\begin{frame}[fragile]{A implementação da IRQ}
+  Um \emph{device driver} utiliza de IRQ's e se registra para ser capaz de
+  responder aos eventos por ele definidos.
+
+\begin{verbatim}
+  __init
+  ...
+  if (request_irq(IRQ_TECLADO, interrupcao_teclado, 
+      IRQF_SHARED, "interrupcao_teclado", 
+      (void *)&teclado_device)) {
+  ...
+\end{verbatim}
+\end{frame}
+
+\begin{frame}[fragile]{O interrupt handler}
+\begin{verbatim}
+static irqreturn_t interrupcao_teclado(int irq, 
+  void *dev_id) {
+  if (irq != 1)
+    return IRQ_NONE;
+  codigo_da_tecla_da_controladora_de_teclado = 
+    inb(0x60);
+  if (... não são teclas de interesse ...) {
+    return IRQ_NONE;
+  }
+  queue_work(system_long_wq, 
+    &check_shutdown_condition_task);
+  return IRQ_HANDLED;
+}
+\end{verbatim}
+\end{frame}
+
+\begin{frame}{O interrupt handler}
+  \begin{itemize}
+    \item{\texttt{inb(ADDRESS)}: esta chamada busca o que está na porta
+      enderaçada por "ADDRESS", neste caso porta é o mecanismo usado pela CPU
+      para comunicar com o dispositivo. Para o dispositivo teclado, o dado da
+      tecla pressioanda está em "0x60"}
+    \item{179 e 180 se relacionam ao \emph{clique} das teclas ',' e '.',
+      enquanto 51 e 52 o pressionamento das mesmas}
+    \item{\texttt{queue\_work(FILA\_DO\_KERNEL, FILA\_DE\_TASKS)} aqui
+      escolhe-se a fila destinadas para tasks maiores do Kernel a execução da
+      checagem das condições de cliques e shutdown.}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Filas de Trabalho}
+  Utilizando de uma estrutura do kernel \texttt{work\_struct}, é possível
+  definir subrotinas para serem executadas por threads do kernel em nível
+  privilegiado.
+
+  No caso foi necessário porque o desligamento faria uma interrupção nunca ser
+  finalizada, então tanto a checagem (por questão de performance e prioridade)
+  quanto o desligamento são tarefas executadas numa fila de longa duração do
+  kernel.
+\end{frame}
+
+\begin{frame}[fragile]{O desligamento e checagem}
+
+\begin{verbatim}
+static void check_shutdown_condition(
+  struct work_struct *w) {
+  if (codigo_da_tecla_da_controladora_de_teclado == 51) {
+    pressionado = 1;
+  } else if (pressionado &&
+    (codigo_da_tecla_da_controladora_de_teclado == 180 ||
+    codigo_da_tecla_da_controladora_de_teclado == 52)) {
+    printk("shutdown detectado");
+    kernel_power_off();
+  } else {
+    pressionado = 0;
+  }
+}
+\end{verbatim}
+\end{frame}
+
+\begin{frame}{O desligamento e checagem}
+  Existe a verificação do estado de pressionamento das teclas e a chamada da rotina de desligamento do sistema.
+
+  Esta rotina executa subrotinas do kernel que preparam para o desligamento
+  adequado e migram para o desligamento dos dispositivos e da máquina.
+\end{frame}
+
+\end{document}
+\endinput
+
+%%
+%% End of file `example_DarkConsole.tex'.
